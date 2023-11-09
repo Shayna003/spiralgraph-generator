@@ -1,17 +1,9 @@
 package spirograph;
 
-import java.awt.BorderLayout;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JFormattedTextField;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
+import javax.swing.*;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.DefaultFormatter;
 import spirograph.Spirograph.InnerCircle;
@@ -25,10 +17,12 @@ import spirograph.Spirograph.PenPosition;
  */
 public class GUI extends JFrame {
 
+  JSlider step; // step slider
+
   /**
    * Helper class for number inputs with value restrictions
    */
-  public class NumberSpinner extends JSpinner {
+  public static class NumberSpinner extends JSpinner {
 
     int defaultValue;
 
@@ -50,26 +44,45 @@ public class GUI extends JFrame {
   }
 
   // TODO: color support, multiple graphs support, time slider support;
-  class SettingsPanel extends JPanel {
+  class SettingsPanel extends JPanel
+  {
+    JLabel timeLabel;
+    JLabel stepsLabel;
+    JLabel stepTimeLabel;
 
-    NumberSpinner R_fixed; // fixed circle radius
-    NumberSpinner r_spinning; // spinning circle radius
-    //NumberSpinner offset;
+    //JButton generateRandom;
 
-    NumberSpinner time;
-    JButton clear; // clear canvas
-    JButton reset; // reset all fields and delete all spirographs
-    //JButton stop; // pause/resume
-    //JButton reset;
-    // steps
-    // duration
-    // scale
-    // line width
-    // pen positions & colors
-    // (remove spirograph)/multiple spirographs
+    NumberSpinner steps_for_completion; // steps needed for a spirograph's inner circle's pen position to complete its drawing, higher = better resolution
+    NumberSpinner step_time; // time of each step, in milliseconds
+    JButton animate;
 
-    public SettingsPanel() {
-      R_fixed = new NumberSpinner(0, 100, 1, 50, null, 4);
+    public SettingsPanel()
+    {
+      setLayout(new GridBagLayout());
+      steps_for_completion = new NumberSpinner(1, 1000, 10, 200, null, 4);
+      step_time = new NumberSpinner(1, 10, 1, 1, null, 4);
+      step = new JSlider(0, 1000000, 0);
+      animate = new JButton("animate");
+      animate.addActionListener(event ->
+      {
+
+      });
+
+      step.addChangeListener(event ->
+      {
+        timeLabel.setText(String.format("Current Step: %7d", step.getValue()));
+      });
+
+      timeLabel = new JLabel(String.format("Current Step: %7d", 0));
+      stepsLabel = new JLabel("Steps for completing one drawing: ");
+      stepTimeLabel = new JLabel("Time(ms) for each step: ");
+      add(timeLabel, new GBC(0, 0).setAnchor(GBC.EAST));
+      add(step, new GBC(1, 0, 2, 1));
+      add(animate, new GBC(3, 0));
+      add(stepsLabel, new GBC(0, 1).setAnchor(GBC.EAST));
+      add(steps_for_completion, new GBC(1, 1).setAnchor(GBC.WEST));
+      add(stepTimeLabel, new GBC(0, 2).setAnchor(GBC.EAST));
+      add(step_time, new GBC(1, 2).setAnchor(GBC.WEST));
     }
   }
 
@@ -87,7 +100,7 @@ public class GUI extends JFrame {
 
     add(editor, BorderLayout.EAST);
     add(settingsPanel, BorderLayout.NORTH);
-    add(plotter, BorderLayout.CENTER);
+    add(new JScrollPane(plotter), BorderLayout.CENTER);
 
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     setTitle("Spirograph Generator");
@@ -95,16 +108,23 @@ public class GUI extends JFrame {
     setLocationRelativeTo(null);
   }
 
-  class SpiralgraphPlotter extends JComponent {
+  class SpiralgraphPlotter extends JComponent
+  {
 
-    volatile int step;
+    @Override
+    public Dimension getPreferredSize()
+    {
+      return new Dimension(500, 500);
+    }
+
     @Override
     public void paintComponent(Graphics g) {
       Graphics2D g2 = (Graphics2D) g;
       for (Spirograph graph : spirographs) {
+        g2.translate(graph.offset_x, graph.offset_y);
         for (InnerCircle circle : graph.inner_circles) {
           for (PenPosition pp : circle.pen_positions) {
-            int upper_bound = pp.points_needed_to_draw(step);
+            int upper_bound = pp.points_needed_to_draw(step.getValue());
             if (upper_bound < 0)
               continue;
             g2.setColor(pp.pen_color);
@@ -115,6 +135,7 @@ public class GUI extends JFrame {
             }
           }
         }
+        g2.translate(-graph.offset_x, -graph.offset_y);
       }
     }
   }
