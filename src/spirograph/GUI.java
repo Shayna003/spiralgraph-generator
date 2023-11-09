@@ -1,33 +1,18 @@
 package spirograph;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
-import java.beans.EventHandler;
 import java.util.ArrayList;
-import java.util.EventObject;
-import javax.swing.AbstractCellEditor;
 import javax.swing.JButton;
-import javax.swing.JColorChooser;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
-import javax.swing.JTable;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.UIManager;
 import javax.swing.event.ChangeListener;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableModel;
 import javax.swing.text.DefaultFormatter;
 import spirograph.Spirograph.InnerCircle;
 import spirograph.Spirograph.PenPosition;
@@ -38,7 +23,7 @@ import spirograph.Spirograph.PenPosition;
  * which cantain an Arraylist of PenPosition objects,
  * which contain pen offset and pen color.
  */
-public class SpirographPlotter extends JFrame {
+public class GUI extends JFrame {
 
   /**
    * Helper class for number inputs with value restrictions
@@ -88,26 +73,31 @@ public class SpirographPlotter extends JFrame {
     }
   }
 
-  //Plotter plotter;
+  SpiralgraphPlotter plotter;
   SettingsPanel settingsPanel;
+  SpirographEditor editor;
+  ArrayList<Spirograph> spirographs;
 
-  public SpirographPlotter() {
-    //settingsPanel = new SettingsPanel();
-    //plotter = new Plotter();
-    //add(settingsPanel, BorderLayout.NORTH);
-    //add(plotter, BorderLayout.CENTER);
+  public GUI()
+  {
+    spirographs = new ArrayList<>();
+    settingsPanel = new SettingsPanel();
+    plotter = new SpiralgraphPlotter();
+    editor = new SpirographEditor(this);
+
+    add(editor, BorderLayout.EAST);
+    add(settingsPanel, BorderLayout.NORTH);
+    add(plotter, BorderLayout.CENTER);
 
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    setTitle("spirograph.Spirograph Plotter");
+    setTitle("Spirograph Generator");
     pack();
     setLocationRelativeTo(null);
   }
 
-  class Plotter extends JComponent {
+  class SpiralgraphPlotter extends JComponent {
 
     volatile int step;
-    ArrayList<Spirograph> spirographs;
-
     @Override
     public void paintComponent(Graphics g) {
       Graphics2D g2 = (Graphics2D) g;

@@ -13,8 +13,11 @@ import java.util.ArrayList;
  */
 public class Spirograph
 {
-  int R;
-  int r;
+  GUI gui;
+  int outer_radius;
+  //int r;
+  int offset_x;
+  int offset_y;
   double rotations; // rotations needed to complete the spirograph
 
   // fixed once assigned, time needed to complete one rotation,
@@ -29,13 +32,13 @@ public class Spirograph
 
   public class InnerCircle
   {
-    double radius;
+    double inner_radius;
     ArrayList<PenPosition> pen_positions;
 
-    public InnerCircle(ArrayList<PenPosition> pen_positions, double radius)
+    public InnerCircle(ArrayList<PenPosition> pen_positions, double inner_radius)
     {
       this.pen_positions = pen_positions;
-      this.radius = radius;
+      this.inner_radius = inner_radius;
     }
   }
   /**
@@ -92,9 +95,9 @@ public class Spirograph
     Point2D.Double computePoint(int step)
     {
       double t = time_for_rotation * step / steps_for_rotation;
-      double x = (R-r)*cos(t) + offset*cos(((R-r)/r)*t);
-      double y = (R-r)*sin(t) - offset*sin(((R-r)/r)*t);
-      return new Point2D.Double(x, y);
+      //double x = (R-r)*cos(t) + offset*cos(((R-r)/r)*t);
+      //double y = (R-r)*sin(t) - offset*sin(((R-r)/r)*t);
+      return new Point2D.Double(0, 0);
     }
   }
 
@@ -113,14 +116,13 @@ public class Spirograph
     return lcm;
   }
 
-  public Spirograph(int R, int r, int time_for_rotation, int steps_for_rotation, ArrayList<InnerCircle> inner_circles)
+  public Spirograph(GUI gui, int outer_radius, int offset_x, int offset_y, ArrayList<InnerCircle> inner_circles)
   {
-    this.R = R;
-    this.r = r;
-    this.time_for_rotation = time_for_rotation;
-    this.steps_for_rotation = steps_for_rotation;
+    this.outer_radius = outer_radius;
+    //this.time_for_rotation = time_for_rotation;
+    //this.steps_for_rotation = steps_for_rotation;
     this.inner_circles = inner_circles;
-    this.rotations = lcm(r, R) / (double) r;
+    //this.rotations = lcm(r, R) / (double) r;
   }
 
   /*Point2D.Double computePoint(int t)

@@ -10,7 +10,7 @@ public class Main
   {
     EventQueue.invokeLater(() ->
     {
-      JFrame frame = new SpirographPlotter();
+      JFrame frame = new GUI();
       frame.setVisible(true);
     });
   }
