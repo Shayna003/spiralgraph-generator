@@ -88,14 +88,14 @@ public class SpirographPlotter extends JFrame {
     }
   }
 
-  Plotter plotter;
+  //Plotter plotter;
   SettingsPanel settingsPanel;
 
   public SpirographPlotter() {
-    settingsPanel = new SettingsPanel();
-    plotter = new Plotter();
-    add(settingsPanel, BorderLayout.NORTH);
-    add(plotter, BorderLayout.CENTER);
+    //settingsPanel = new SettingsPanel();
+    //plotter = new Plotter();
+    //add(settingsPanel, BorderLayout.NORTH);
+    //add(plotter, BorderLayout.CENTER);
 
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     setTitle("spirograph.Spirograph Plotter");
@@ -103,154 +103,25 @@ public class SpirographPlotter extends JFrame {
     setLocationRelativeTo(null);
   }
 
-  class PenTable extends JTable {
+  class Plotter extends JComponent {
 
-    PenTableModel model;
+    volatile int step;
+    ArrayList<Spirograph> spirographs;
 
-    public PenTable() {
-      super();
-      model = new PenTableModel();
-      setModel(model);
-
-      setDefaultRenderer(Color.class, new ColorCellRenderer());
-      setDefaultEditor(Color.class, new ColorCellEditor());
-    }
-
-    class PenTableModel extends AbstractTableModel
-    {
-      String[] columnNames = { "Inner Circle Radius", "Pen Offset", "Color"};
-      ArrayList<InnerCircle> inner_circles;
-
-      @Override
-      public String getColumnName(int c)
-      {
-        return columnNames[c];
-      }
-
-      @Override
-      public Class<?> getColumnClass(int c)
-      {
-        if (c == 0) return Double.class;
-        else if (c == 1) return Double.class;
-        else return Color.class;
-      }
-
-      @Override
-      public int getColumnCount()
-      {
-        return columnNames.length;
-      }
-
-      @Override
-      public int getRowCount()
-      {
-        return inner_circles.size();
-      }
-
-      @Override
-      public Object getValueAt(int r, int c)
-      {
-        InnerCircle circle = inner_circles.get(r);
-        if (c == 0)
-        {
-          return circle.radius;
-        }
-        else if ()
-      }
-
-      public void setValueAt(Object obj, int r, int c)
-      {
-        cells[r][c] = obj;
-      }
-
-      public boolean isCellEditable(int r, int c)
-      {
-        return c == PLANET_COLUMN || c == MOONS_COLUMN || c == GASEOUS_COLUMN
-            || c == COLOR_COLUMN;
-      }
-      public PenTableModel()
-      {
-      }
-    }
-
-    class ColorCellRenderer extends JPanel implements TableCellRenderer {
-
-      @Override
-      public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-          boolean hasFocus, int row, int column) {
-        setBackground((Color) value);
-        if (hasFocus)
-          setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
-        else
-          setBorder(null);
-        return this;
-      }
-    }
-
-    /**
-     * Shows a JDialog when user clicks on a color to allow selection of color
-     */
-    class ColorCellEditor extends AbstractCellEditor implements TableCellEditor {
-
-      JColorChooser colorChooser;
-      JDialog colorDialog;
-      private JPanel panel;
-
-      public ColorCellEditor() {
-        panel = new JPanel();
-        colorChooser = new JColorChooser();
-        colorDialog = JColorChooser.createDialog(null, "Planet Color", false, colorChooser,
-            EventHandler.create(ActionListener.class, this, "stopCellEditing"),
-            EventHandler.create(ActionListener.class, this, "cancelCellEditing"));
-      }
-
-      public Component getTableCellEditorComponent(JTable table, Object currentValue,
-          boolean isSelected, int row, int column) {
-        colorChooser.setColor((Color) currentValue);
-        return panel;
-      }
-
-      public boolean shouldSelectCell(EventObject anEvent) {
-        colorDialog.setVisible(true);
-        return true;
-      }
-
-      public void cancelCellEditing() {
-        colorDialog.setVisible(false);
-        super.cancelCellEditing();
-      }
-
-      public boolean stopCellEditing() {
-        colorDialog.setVisible(false);
-        super.stopCellEditing();
-        return true;
-      }
-
-      public Object getCellEditorValue() {
-        return colorChooser.getColor();
-      }
-    }
-
-    class Plotter extends JComponent {
-
-      volatile int step;
-      ArrayList<Spirograph> spirographs;
-
-      @Override
-      public void paintComponent(Graphics g) {
-        Graphics2D g2 = (Graphics2D) g;
-        for (Spirograph graph : spirographs) {
-          for (InnerCircle circle : graph.inner_circles) {
-            for (PenPosition pp : circle.pen_positions) {
-              int upper_bound = pp.points_needed_to_draw(step);
-              if (upper_bound < 0)
-                continue;
-              g2.setColor(pp.pen_color);
-              for (int i = 0; i <= upper_bound; i++) {
-                Point2D.Double p1 = i == 0 ? pp.points.get(0) : pp.points.get(i - 1);
-                Point2D.Double p2 = pp.points.get(i);
-                g2.drawLine((int) p1.x, (int) p1.y, (int) p2.x, (int) p2.y);
-              }
+    @Override
+    public void paintComponent(Graphics g) {
+      Graphics2D g2 = (Graphics2D) g;
+      for (Spirograph graph : spirographs) {
+        for (InnerCircle circle : graph.inner_circles) {
+          for (PenPosition pp : circle.pen_positions) {
+            int upper_bound = pp.points_needed_to_draw(step);
+            if (upper_bound < 0)
+              continue;
+            g2.setColor(pp.pen_color);
+            for (int i = 0; i <= upper_bound; i++) {
+              Point2D.Double p1 = i == 0 ? pp.points.get(0) : pp.points.get(i - 1);
+              Point2D.Double p2 = pp.points.get(i);
+              g2.drawLine((int) p1.x, (int) p1.y, (int) p2.x, (int) p2.y);
             }
           }
         }
