@@ -5,13 +5,18 @@ import javax.swing.JFrame;
 
 public class Main
 {
-//TODO: add/edit/tree buttons, animate/change calculations in spiralgrphs/massive testing/generate random
+//TODO: generate random
   public static void main(String[] args)
   {
     EventQueue.invokeLater(() ->
     {
       JFrame frame = new GUI();
       frame.setVisible(true);
+      //144
+      //70
+        //33
+        // 70
+        // 17
     });
   }
 }

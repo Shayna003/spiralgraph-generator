@@ -2,12 +2,10 @@ package spirograph;
 
 import javax.swing.*;
 import javax.swing.event.*;
-import javax.swing.plaf.IconUIResource;
 import javax.swing.tree.*;
 import java.awt.*;
 import java.util.ArrayList;
 
-import com.sun.source.tree.Tree;
 import spirograph.Spirograph.InnerCircle;
 import spirograph.Spirograph.InnerCircle.PenPosition;
 
@@ -23,7 +21,6 @@ public class SpirographEditor extends JPanel
   JPanel buttonsPanel;
   JTree tree;
   SpirographTreeModel model;
-  //DefaultMutableTreeNode selectedNode;
   SpiralGraphDialog spiralGraphDialog;
   InnerCircleDialog innerCircleDialog;
   PenPositionDialog penPositionDialog;
@@ -225,7 +222,6 @@ public class SpirographEditor extends JPanel
 
   void updateGraphs()
   {
-    //System.out.println("update graphics");
     gui.plotter.repaint();
     gui.plotter.revalidate();
     gui.repaint();
@@ -245,15 +241,11 @@ public class SpirographEditor extends JPanel
       boolean create = spiralGraphDialog.showDialog();
       if (create)
       {
-        //System.out.println("outer radius: " + spiralGraphDialog.outer_radius.getValue());
         Spirograph spiral = new Spirograph(gui, (int) spiralGraphDialog.outer_radius.getValue(), (int) spiralGraphDialog.offset_x.getValue(), (int) spiralGraphDialog.offset_y.getValue(), new ArrayList<InnerCircle>());
         gui.spirographs.add(spiral);
-        //System.out.println(gui.spirographs);
-        //tree.expandRow(0);
 
         TreePath path = new TreePath(new Object[] {model.root});
         model.fireTreeStructureChanged(new TreeModelEvent(tree, path));
-        //tree.expandPath(new TreePath(new Object[] {model.root, spiral}));
         model.expandAllPaths();
         tree.setSelectionPath(new TreePath(new Object[] {model.root, spiral}));
       }
@@ -265,13 +257,11 @@ public class SpirographEditor extends JPanel
       boolean create = innerCircleDialog.showDialog();
       if (create)
       {
-        //System.out.println("inner radius: " + innerCircleDialog.inner_radius.getValue());
         Spirograph owner = (Spirograph) tree.getSelectionPath().getPath()[1];
         InnerCircle circle = owner.addInnerCircle(new ArrayList<PenPosition>(), (int) innerCircleDialog.inner_radius.getValue());
 
         TreePath path = new TreePath(new Object[] {model.root, owner});
         model.fireTreeStructureChanged(new TreeModelEvent(tree, path));
-        //tree.expandPath(new TreePath(new Object[] {model.root, owner, circle}));
         model.expandAllPaths();
         tree.setSelectionPath(new TreePath(new Object[] {model.root, owner, circle}));
       }
@@ -284,13 +274,11 @@ public class SpirographEditor extends JPanel
       boolean create = penPositionDialog.showDialog();
       if (create)
       {
-        //System.out.println("offset: " + penPositionDialog.offset.getValue());
         InnerCircle circle = (InnerCircle) tree.getSelectionPath().getPath()[2];
         PenPosition pp = circle.addPenPosition((int) penPositionDialog.offset.getValue(), penPositionDialog.color.getBackground());
 
         TreePath path = new TreePath(new Object[] {model.root, tree.getSelectionPath().getPath()[1], circle});
         model.fireTreeStructureChanged(new TreeModelEvent(tree, path));
-        //tree.expandPath(path);
         model.expandAllPaths();
         tree.setSelectionPath(new TreePath(new Object[] {model.root, tree.getSelectionPath().getPath()[1], circle, pp}));
       }
@@ -392,16 +380,9 @@ public class SpirographEditor extends JPanel
 
     tree.setExpandsSelectedPaths(true);
     tree.setRootVisible(false);
-    //tree.setExpandsSelectedPaths(true);
-    //tree.setSelectionPath(new TreePath(model.root));
-    //tree.expandPath(new TreePath(model.root));
     tree.expandRow(0);
-
-    //tree.expandRow(0);
-    //tree.expandRow(0);
     tree.setShowsRootHandles(true);
 
-    //
     tree.addTreeSelectionListener(new TreeSelectionListener()
     {
       @Override
@@ -419,23 +400,12 @@ public class SpirographEditor extends JPanel
 
   class SpirographRenderer extends DefaultTreeCellRenderer
   {
-    /*JPanel panel;
-    JLabel label;
-    public SpirographRenderer()
-    {
-      label = new JLabel();
-      setLayout(new BorderLayout());
-      add(label, BorderLayout.CENTER);
-    }*/
-
     public SpirographRenderer()
     {
       super();
       setOpenIcon(null);
       setClosedIcon(null);
       setLeafIcon(null);
-      //UIManager.put("Tree.collapsedIcon", new IconUIResource(new NodeIcon('+')));
-      //UIManager.put("Tree.expandedIcon",  new IconUIResource(new NodeIcon('-')));
     }
 
     @Override
@@ -444,8 +414,6 @@ public class SpirographEditor extends JPanel
       JLabel l = (JLabel) super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
       l.setOpaque(false);
       JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
-      //setOpaque(false);
-      //setBackground(new Color(0, 0, 0, 0));
       p.setOpaque(true);
       p.setBackground(new Color(0, 0, 0, 0));
       l.setOpaque(true);
@@ -454,36 +422,29 @@ public class SpirographEditor extends JPanel
       TreePath path = tree.getPathForRow(row);
       if (path == null) // I don't know why this happens when you change the look and feel
       {
-        //System.out.println("!path is null for row" + row );
         return p;
       }
       Object obj = path.getLastPathComponent();
 
-      //System.out.println("rendering row=" + row + ", value=" + value + ", class=" + value.getClass());
-      //setBackground(Color.white);
       if (obj.getClass() == Object.class)
       {
         l.setText("All Spirographs");
       }
       else if (obj.getClass() == Spirograph.class)
       {
-        //System.out.println("rendering spirograph " + value);
         Spirograph sg = (Spirograph) obj;
         l.setText("Spirograph | offsetx= " + sg.offset_x + ", offsety=" + sg.offset_y + ", outer_radius=" + sg.outer_radius);
       }
       else if (obj.getClass() == InnerCircle.class)
       {
-        //System.out.println("rendering innercircle " + value);
         InnerCircle circle = (InnerCircle) obj;
         l.setText("Inner Circle | radius= " + circle.inner_radius);
       }
       else if (obj.getClass() == PenPosition.class)
       {
-        //System.out.println("rendering penposition " + value);
         PenPosition pp = (PenPosition) obj;
         p.setBackground(pp.pen_color);
         l.setText("Pen Position | offset= " + pp.offset);
-        //l.setBackground(pp.pen_color);
       }
 
       if (hasFocus)
@@ -497,7 +458,6 @@ public class SpirographEditor extends JPanel
   }
   class SpirographTreeModel implements TreeModel
   {
-    //private Variable root;
     private EventListenerList listenerList = new EventListenerList();
     Object root;
 
@@ -512,10 +472,6 @@ public class SpirographEditor extends JPanel
 
     public int getChildCount(Object parent)
     {
-      if (parent == root)
-      {
-        //System.out.println("root child count: " + gui.spirographs.size());
-      }
       if (parent == root) return gui.spirographs.size();
       else if (parent.getClass() == Spirograph.class) return ((Spirograph)parent).inner_circles.size();
       if (parent.getClass() == InnerCircle.class) return ((InnerCircle) parent).pen_positions.size();
@@ -526,7 +482,6 @@ public class SpirographEditor extends JPanel
     {
       if (parent == root)
       {
-        //System.out.println("  get child " + index + ": " + gui.spirographs.get(index));
         return gui.spirographs.get(index);
       }
       else if (parent.getClass() == Spirograph.class) return ((Spirograph)parent).inner_circles.get(index);
@@ -537,7 +492,6 @@ public class SpirographEditor extends JPanel
     {
       if (parent == root)
       {
-        //System.out.println("index of " + child + ": " + gui.spirographs.indexOf(child));
         return gui.spirographs.indexOf(child);
       }
       else if (parent.getClass() == Spirograph.class) return ((Spirograph)parent).inner_circles.indexOf(child);

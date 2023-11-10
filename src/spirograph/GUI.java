@@ -47,8 +47,6 @@ public class GUI extends JFrame implements ActionListener
     }
   }
 
-  // TODO: color support, multiple graphs support, time slider support;
-
   @Override
   public void actionPerformed(ActionEvent event)
   {
@@ -63,7 +61,6 @@ public class GUI extends JFrame implements ActionListener
   }
   public int steps_for_completion()
   {
-    //System.out.println("steps_for_completion: " + settingsPanel.steps_for_completion.getValue());
     return (int) settingsPanel.steps_for_completion.getValue();
   }
   class SettingsPanel extends JPanel
@@ -99,13 +96,11 @@ public class GUI extends JFrame implements ActionListener
         if (animate.getText().equals("animate"))
         {
           animate.setText("pause");
-          //timer.setDelay((int) step_time.getValue());
           timer.start();
         }
         else
         {
           animate.setText("animate");
-          //timer.setDelay((int) step_time.getValue());
           timer.stop();
         }
       });
@@ -187,9 +182,6 @@ public class GUI extends JFrame implements ActionListener
         {
           for (PenPosition pp : circle.pen_positions)
           {
-            //int upper_bound = pp.points_needed_to_draw(step.getValue());
-            //if (upper_bound < 0)
-            //  continue;
             g2.setColor(pp.pen_color);
             for (int i = 0; i < Math.min(pp.points.size(), step.getValue() + 1); i++)
             {
