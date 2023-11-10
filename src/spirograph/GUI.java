@@ -1,6 +1,8 @@
 package spirograph;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import javax.swing.*;
@@ -16,7 +18,8 @@ import spirograph.Spirograph.InnerCircle.PenPosition;
  * which cantain an Arraylist of PenPosition objects,
  * which contain pen offset and pen color.
  */
-public class GUI extends JFrame {
+public class GUI extends JFrame implements ActionListener
+{
 
   JSlider step; // step slider
 
@@ -46,6 +49,18 @@ public class GUI extends JFrame {
 
   // TODO: color support, multiple graphs support, time slider support;
 
+  @Override
+  public void actionPerformed(ActionEvent event)
+  {
+    if (step.getValue() < steps_for_completion())
+    {
+      step.setValue(step.getValue() + 1);
+    }
+    else
+    {
+      step.setValue(0);
+    }
+  }
   public int steps_for_completion()
   {
     //System.out.println("steps_for_completion: " + settingsPanel.steps_for_completion.getValue());
@@ -67,13 +82,32 @@ public class GUI extends JFrame {
     public SettingsPanel()
     {
       setLayout(new GridBagLayout());
-      steps_for_completion = new NumberSpinner(100, 100000, 10000, 5000, null, 4);
-      step_time = new NumberSpinner(1, 10, 1, 1, null, 4);
+
+      timer = new Timer(1, GUI.this);
+
+      steps_for_completion = new NumberSpinner(0, 100000, 500, 5000, null, 4);
+      step_time = new NumberSpinner(0, 10, 1, 1, null, 4);
+      step_time.addChangeListener(event ->
+      {
+        timer.setDelay((int) step_time.getValue());
+      });
+
       step = new JSlider(0, 5000, 0);
       animate = new JButton("animate");
       animate.addActionListener(event ->
       {
-
+        if (animate.getText().equals("animate"))
+        {
+          animate.setText("pause");
+          //timer.setDelay((int) step_time.getValue());
+          timer.start();
+        }
+        else
+        {
+          animate.setText("animate");
+          //timer.setDelay((int) step_time.getValue());
+          timer.stop();
+        }
       });
 
       step.addChangeListener(event ->
@@ -114,6 +148,7 @@ public class GUI extends JFrame {
   SettingsPanel settingsPanel;
   SpirographEditor editor;
   ArrayList<Spirograph> spirographs;
+  Timer timer;
 
   public GUI()
   {
