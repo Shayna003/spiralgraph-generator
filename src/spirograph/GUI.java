@@ -69,7 +69,7 @@ public class GUI extends JFrame {
       setLayout(new GridBagLayout());
       steps_for_completion = new NumberSpinner(100, 100000, 10000, 5000, null, 4);
       step_time = new NumberSpinner(1, 10, 1, 1, null, 4);
-      step = new JSlider(0, 1000000, 0);
+      step = new JSlider(0, 5000, 0);
       animate = new JButton("animate");
       animate.addActionListener(event ->
       {
@@ -84,10 +84,14 @@ public class GUI extends JFrame {
 
       steps_for_completion.addChangeListener(event ->
       {
+        double percent = step.getValue() / (double) step.getMaximum();
+        step.setMaximum(steps_for_completion());
+        step.setValue((int) (percent * step.getMaximum()));
         for (Spirograph spiral : spirographs)
         {
           spiral.recomputePoints();
         }
+        plotter.repaint();
       });
 
       redraw = new JButton("redraw");
@@ -152,7 +156,7 @@ public class GUI extends JFrame {
             //if (upper_bound < 0)
             //  continue;
             g2.setColor(pp.pen_color);
-            for (int i = 0; i < pp.points.size(); i++)
+            for (int i = 0; i < Math.min(pp.points.size(), step.getValue() + 1); i++)
             {
               Point2D.Double p1 = i == 0 ? pp.points.get(0) : pp.points.get(i - 1);
               Point2D.Double p2 = pp.points.get(i);

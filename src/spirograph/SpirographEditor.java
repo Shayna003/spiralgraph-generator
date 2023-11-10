@@ -47,9 +47,9 @@ public class SpirographEditor extends JPanel
       labely = new JLabel("offset y: ");
       outer_radiusLabel = new JLabel("outer circle radius: ");
 
-      offset_x = new GUI.NumberSpinner(0, 1000, 50, 0, null, 4);
-      offset_y = new GUI.NumberSpinner(0, 1000, 50, 0, null, 4);
-      outer_radius = new GUI.NumberSpinner(10, 1000, 10, 300, null, 4);
+      offset_x = new GUI.NumberSpinner(0, 1000, 1, 0, null, 4);
+      offset_y = new GUI.NumberSpinner(0, 1000, 1, 0, null, 4);
+      outer_radius = new GUI.NumberSpinner(0, 1000, 1, 300, null, 4);
 
       panel.add(labelx, new GBC(0, 0).setAnchor(GBC.EAST));
       panel.add(offset_x, new GBC(1, 0).setAnchor(GBC.WEST));
@@ -104,7 +104,7 @@ public class SpirographEditor extends JPanel
       JPanel panel = new JPanel(new GridBagLayout());
       inner_radiusLabel = new JLabel("inner circle radius: ");
 
-      inner_radius = new GUI.NumberSpinner(10, 1000, 10, 300, null, 4);
+      inner_radius = new GUI.NumberSpinner(0, 1000, 10, 50, null, 4);
 
       panel.add(inner_radiusLabel, new GBC(0, 0).setAnchor(GBC.EAST));
       panel.add(inner_radius, new GBC(1, 0).setAnchor(GBC.WEST));
@@ -225,6 +225,7 @@ public class SpirographEditor extends JPanel
 
   void updateGraphs()
   {
+    //System.out.println("update graphics");
     gui.plotter.repaint();
     gui.plotter.revalidate();
     gui.repaint();
@@ -260,7 +261,7 @@ public class SpirographEditor extends JPanel
     addInnerCircle = new JButton("+ Inner Circle");
     addInnerCircle.addActionListener(event ->
     {
-      innerCircleDialog.setValues(30);
+      innerCircleDialog.setValues(50);
       boolean create = innerCircleDialog.showDialog();
       if (create)
       {
@@ -582,6 +583,7 @@ public class SpirographEditor extends JPanel
       {
         l.treeStructureChanged(event);
       }
+      updateGraphs();
     }
 
     protected void fireTreeStructureChanged(Object oldRoot)

@@ -55,6 +55,8 @@ public class Spirograph
       int offset;
       Color pen_color;
       double rotations;
+      double large_rotations;
+      double small_rotations;
       ArrayList<Point2D.Double> points; // used for painting
 
       public PenPosition(int index, int offset, Color pen_color)
@@ -76,9 +78,27 @@ public class Spirograph
        */
       void compute_points()
       {
-        points = new ArrayList<>();
-        this.rotations = lcm(inner_radius, outer_radius) * lcm(offset, inner_radius) / (double) inner_radius;
-        for (int step = 1; step < gui.steps_for_completion() + 1; step++)
+        points = new ArrayList<>(gui.steps_for_completion() + 1);
+        /*this.large_rotations = lcm(inner_radius, outer_radius) / (double) inner_radius;
+        this.small_rotations = lcm(offset, inner_radius) / (double) offset;
+        this.rotations = large_rotations * small_rotations;*/
+
+        if (outer_radius % inner_radius == 0)
+        {
+          this.rotations = 1;
+        }
+        else this.rotations = lcm(inner_radius, outer_radius) / (double) inner_radius;//lcm(lcm(inner_radius, outer_radius), offset) / (double) Math.min(inner_radius, offset);
+
+        //this.rotations = lcm(offset, (int) large_rotations) / (double) offset;
+        //System.out.printf("R: %d, r: %d, lcm: %d, large_rotations: %.2f, lcm: %d, rotations: %.2f" + System.lineSeparator(), outer_radius, inner_radius, lcm(inner_radius, outer_radius), large_rotations, lcm(offset, (int) large_rotations), rotations);
+
+        double k = outer_radius / inner_radius;
+
+        //System.out.println("large_rotations: " + large_rotations + ", rotations: " + rotations);
+
+        //this.small_rotations = lcm(offset, inner_radius);
+        //this.rotations = lcm((int) small_rotations, (int)large_rotations);
+        for (int step = 0; step < gui.steps_for_completion() + 1; step++)
         {
           points.add(computePoint(step));
         }
@@ -147,7 +167,7 @@ public class Spirograph
   {
     if (n1 == 0 || n2 == 0) { return 0; }
     n1 = Math.abs(n1);
-    n2 = Math.abs(n1);
+    n2 = Math.abs(n2);
     int higher = Math.max(n1, n2);
     int lower = Math.min(n1, n2);
     int lcm = higher;
