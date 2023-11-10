@@ -30,7 +30,7 @@ public class Spirograph
 
   ArrayList<InnerCircle> inner_circles;
 
-  public InnerCircle addInnerCircle(ArrayList<PenPosition> pen_positions, int inner_radius)
+  public InnerCircle addInnerCircle(ArrayList<InnerCircle.PenPosition> pen_positions, int inner_radius)
   {
     InnerCircle circle = new InnerCircle(pen_positions, inner_radius);
     inner_circles.add(circle);
@@ -39,6 +39,65 @@ public class Spirograph
 
   public class InnerCircle
   {
+    /**
+     * Records pen position and color
+     */
+    public class PenPosition
+    {
+      int index;
+      int offset;
+      Color pen_color;
+      //double rotations;
+      ArrayList<Point2D.Double> points; // used for painting
+
+      public PenPosition(int index, int offset, Color pen_color)
+      {
+        this.index = index;
+        this.offset = offset;
+        this.pen_color = pen_color;
+        compute_points();
+      }
+
+      /**
+       * All drawing points are precomputed and fetched according to step number
+       */
+      void compute_points()
+      {
+        points = new ArrayList<>();
+        for (int step = 1; step < steps_for_rotation + 1; step++)
+        {
+          points.add(computePoint(step));
+        }
+      }
+
+      /*
+       * @return whether this pen position needs to be drawn at the given step
+       */
+      public boolean need_to_draw(int step)
+      {
+        int current_pp_index = (int) (Math.ceil(step / (steps_for_rotation * rotations)) - 1);
+        return  current_pp_index >= index;
+      }
+
+      /*
+       * @return index of points needed to be drawn at given step, upper bound inclusive
+       */
+      public int points_needed_to_draw(int step)
+      {
+        double steps = step - index * (steps_for_rotation * rotations);
+        if (steps <= 0) return -1;
+        if (steps >= points.size()) return points.size() - 1;
+        else return (int) Math.ceil(steps);
+      }
+
+      Point2D.Double computePoint(int step)
+      {
+        double t = time_for_rotation * step / steps_for_rotation;
+        //double x = (R-r)*cos(t) + offset*cos(((R-r)/r)*t);
+        //double y = (R-r)*sin(t) - offset*sin(((R-r)/r)*t);
+        return new Point2D.Double(0, 0);
+      }
+    }
     int inner_radius;
     ArrayList<PenPosition> pen_positions;
 
@@ -53,65 +112,6 @@ public class Spirograph
       PenPosition pp = new PenPosition(pen_positions.size(), offset, color);
       pen_positions.add(pp);
       return pp;
-    }
-  }
-  /**
-   * Records pen position and color
-   */
-  public class PenPosition
-  {
-    int index;
-    int offset;
-    Color pen_color;
-    //double rotations;
-    ArrayList<Point2D.Double> points; // used for painting
-
-    public PenPosition(int index, int offset, Color pen_color)
-    {
-      this.index = index;
-      this.offset = offset;
-      this.pen_color = pen_color;
-      compute_points();
-    }
-
-    /**
-     * All drawing points are precomputed and fetched according to step number
-     */
-    void compute_points()
-    {
-      points = new ArrayList<>();
-      for (int step = 1; step < steps_for_rotation + 1; step++)
-      {
-        points.add(computePoint(step));
-      }
-    }
-
-    /*
-     * @return whether this pen position needs to be drawn at the given step
-     */
-    public boolean need_to_draw(int step)
-    {
-      int current_pp_index = (int) (Math.ceil(step / (steps_for_rotation * rotations)) - 1);
-      return  current_pp_index >= index;
-    }
-
-    /*
-     * @return index of points needed to be drawn at given step, upper bound inclusive
-     */
-    public int points_needed_to_draw(int step)
-    {
-      double steps = step - index * (steps_for_rotation * rotations);
-      if (steps <= 0) return -1;
-      if (steps >= points.size()) return points.size() - 1;
-      else return (int) Math.ceil(steps);
-    }
-
-    Point2D.Double computePoint(int step)
-    {
-      double t = time_for_rotation * step / steps_for_rotation;
-      //double x = (R-r)*cos(t) + offset*cos(((R-r)/r)*t);
-      //double y = (R-r)*sin(t) - offset*sin(((R-r)/r)*t);
-      return new Point2D.Double(0, 0);
     }
   }
 

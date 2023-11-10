@@ -6,8 +6,9 @@ import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.DefaultFormatter;
+
 import spirograph.Spirograph.InnerCircle;
-import spirograph.Spirograph.PenPosition;
+import spirograph.Spirograph.InnerCircle.PenPosition;
 
 /**
  * SpirographPlotter contains a table of InnerCircle objects,
