@@ -21,6 +21,8 @@ public class SpirographEditor extends JPanel
   SpirographTreeModel model;
   //DefaultMutableTreeNode selectedNode;
   SpiralGraphDialog spiralGraphDialog;
+  InnerCircleDialog innerCircleDialog;
+  PenPositionDialog penPositionDialog;
 
   class SpiralGraphDialog extends JDialog
   {
@@ -83,6 +85,121 @@ public class SpirographEditor extends JPanel
       return ok_pressed;
     }
   }
+
+  class InnerCircleDialog extends JDialog
+  {
+
+    JLabel inner_radiusLabel;
+    GUI.NumberSpinner inner_radius;
+    JButton ok;
+    JButton cancel;
+
+    public InnerCircleDialog()
+    {
+      super(gui, "Inner Circle Editor", true);
+      JPanel panel = new JPanel(new GridBagLayout());
+      inner_radiusLabel = new JLabel("inner circle radius:");
+
+      inner_radius = new GUI.NumberSpinner(10, 1000, 10, 300, null, 4);
+
+      panel.add(inner_radiusLabel, new GBC(0, 0).setAnchor(GBC.EAST));
+      panel.add(inner_radius, new GBC(1, 0).setAnchor(GBC.WEST));
+
+      ok = new JButton("ok");
+      ok.addActionListener(event ->
+      {
+        ok_pressed = true;
+        setVisible(false);
+      });
+      cancel = new JButton("cancel");
+      cancel.addActionListener(event -> setVisible(false));
+
+      panel.add(ok, new GBC(0, 1));
+      panel.add(cancel, new GBC(1, 1));
+      getContentPane().add(panel);
+      setSize(300, 100);
+      setLocationRelativeTo(null);
+    }
+
+    public void setValues(int radius)
+    {
+      inner_radius.setValue(radius);
+    }
+
+    boolean ok_pressed;
+    public boolean showDialog()
+    {
+      ok_pressed = false;
+      setVisible(true);
+      return ok_pressed;
+    }
+  }
+
+  class PenPositionDialog extends JDialog
+  {
+    JLabel offsetLabel;
+    GUI.NumberSpinner offset;
+    JLabel colorLabel;
+    JButton color;
+
+    JButton ok;
+    JButton cancel;
+
+    public PenPositionDialog()
+    {
+      super(gui, "Pen Position Editor", true);
+      JPanel panel = new JPanel(new GridBagLayout());
+      offsetLabel = new JLabel("offset:");
+      colorLabel = new JLabel("color:");
+      color = new JButton();
+      color.setOpaque(true);
+
+      color.addActionListener(event ->
+      {
+        Color newColor = JColorChooser.showDialog(this, "choose pen color", color.getBackground());
+        if (newColor != null)
+        {
+          color.setBackground(newColor);
+        }
+      });
+
+      offset = new GUI.NumberSpinner(0, 1000, 50, 0, null, 4);
+
+      panel.add(offsetLabel, new GBC(0, 0).setAnchor(GBC.EAST));
+      panel.add(offset, new GBC(1, 0).setAnchor(GBC.WEST));
+      panel.add(colorLabel, new GBC(0, 1).setAnchor(GBC.EAST));
+      panel.add(color, new GBC(1, 1).setAnchor(GBC.WEST));
+
+      ok = new JButton("ok");
+      ok.addActionListener(event ->
+      {
+        ok_pressed = true;
+        setVisible(false);
+      });
+      cancel = new JButton("cancel");
+      cancel.addActionListener(event -> setVisible(false));
+
+      panel.add(ok, new GBC(0, 3));
+      panel.add(cancel, new GBC(1, 3));
+      getContentPane().add(panel);
+      setSize(300, 200);
+      setLocationRelativeTo(null);
+    }
+
+    public void setValues(int offset_val, Color pen_color)
+    {
+      offset.setValue(offset_val);
+      color.setBackground(pen_color);
+    }
+
+    boolean ok_pressed;
+    public boolean showDialog()
+    {
+      ok_pressed = false;
+      setVisible(true);
+      return ok_pressed;
+    }
+  }
   Object getSelectedNode()
   {
     TreePath path = tree.getSelectionPath();
@@ -105,6 +222,8 @@ public class SpirographEditor extends JPanel
   {
     this.gui = gui;
     spiralGraphDialog = new SpiralGraphDialog();
+    innerCircleDialog = new InnerCircleDialog();
+    penPositionDialog = new PenPositionDialog();
 
     setLayout(new BorderLayout());
     addSpiralgraph = new JButton("+ Spiralgraph");
@@ -121,17 +240,104 @@ public class SpirographEditor extends JPanel
         //tree.expandRow(0);
 
         model.fireTreeStructureChanged(new TreeModelEvent(tree, new TreePath(new Object[] {model.root})));
-        //model.reload();
-        //model.fireTreeStructureChanged();
-        tree.revalidate();
-        tree.repaint();
       }
     });
     addInnerCircle = new JButton("+ Inner Circle");
+    addInnerCircle.addActionListener(event ->
+    {
+      innerCircleDialog.setValues(30);
+      boolean create = innerCircleDialog.showDialog();
+      if (create)
+      {
+        System.out.println("inner radius: " + innerCircleDialog.inner_radius.getValue());
+        Spirograph owner = (Spirograph) tree.getSelectionPath().getPath()[1];
+        Spirograph.InnerCircle circle = owner.addInnerCircle(new ArrayList<Spirograph.PenPosition>(), (int) innerCircleDialog.inner_radius.getValue());
+
+        model.fireTreeStructureChanged(new TreeModelEvent(tree, new TreePath(new Object[] {model.root, owner})));
+      }
+    });
 
     addPenPosition = new JButton("+ Pen Position");
+    addPenPosition.addActionListener(event ->
+    {
+      penPositionDialog.setValues(10, Color.BLACK);
+      boolean create = penPositionDialog.showDialog();
+      if (create)
+      {
+        System.out.println("offset: " + penPositionDialog.offset.getValue());
+        Spirograph.InnerCircle circle = (Spirograph.InnerCircle) tree.getSelectionPath().getPath()[2];
+        Spirograph.PenPosition pp = circle.addPenPosition((int) penPositionDialog.offset.getValue(), penPositionDialog.color.getBackground());
+
+        model.fireTreeStructureChanged(new TreeModelEvent(tree, new TreePath(new Object[] {model.root, tree.getSelectionPath().getPath()[1], circle})));
+      }
+    });
+
     edit = new JButton("Edit Selected");
+    edit.addActionListener(event ->
+    {
+      Object selected = getSelectedNode();
+      if (selected instanceof Spirograph)
+      {
+        Spirograph spiral = (Spirograph) selected;
+        spiralGraphDialog.setValues(spiral.offset_x, spiral.offset_y, spiral.outer_radius);
+        boolean ok = spiralGraphDialog.showDialog();
+        if (ok)
+        {
+
+          spiral.offset_x = (int) spiralGraphDialog.offset_x.getValue();
+          spiral.offset_y = (int) spiralGraphDialog.offset_y.getValue();
+          spiral.outer_radius = (int) spiralGraphDialog.outer_radius.getValue();
+        }
+        model.fireTreeStructureChanged(model.root);
+      }
+      else if (selected instanceof Spirograph.InnerCircle)
+      {
+        Spirograph.InnerCircle circle = (Spirograph.InnerCircle) selected;
+        innerCircleDialog.setValues(circle.inner_radius);
+        boolean ok = innerCircleDialog.showDialog();
+        if (ok)
+        {
+          circle.inner_radius = (int) innerCircleDialog.inner_radius.getValue();
+          model.fireTreeStructureChanged(new TreeModelEvent(tree, new TreePath(new Object[] {model.root, tree.getSelectionPath().getPath()[1]})));
+        }
+      }
+      else if (selected instanceof Spirograph.PenPosition)
+      {
+        Spirograph.PenPosition pp = (Spirograph.PenPosition) selected;
+
+        penPositionDialog.setValues(pp.offset, pp.pen_color);
+        boolean ok = penPositionDialog.showDialog();
+        if (ok)
+        {
+          pp.offset = (int) penPositionDialog.offset.getValue();
+          pp.pen_color = penPositionDialog.color.getBackground();
+          model.fireTreeStructureChanged(new TreeModelEvent(tree, new TreePath(new Object[] {model.root, tree.getSelectionPath().getPath()[1], tree.getSelectionPath().getPath()[2]})));
+        }
+      }
+    });
+
     delete = new JButton("Delete Selected");
+    delete.addActionListener(event ->
+    {
+      Object selected = getSelectedNode();
+      if (selected instanceof Spirograph)
+      {
+        gui.spirographs.remove(selected);
+        model.fireTreeStructureChanged(model.root);
+      }
+      else if (selected instanceof Spirograph.InnerCircle)
+      {
+        Spirograph owner = (Spirograph) tree.getSelectionPath().getPath()[1];
+        owner.inner_circles.remove(selected);
+        model.fireTreeStructureChanged(new TreePath(new Object[] {model.root, owner}));
+      }
+      else if (selected instanceof Spirograph.PenPosition)
+      {
+        Spirograph.InnerCircle owner = (Spirograph.InnerCircle) tree.getSelectionPath().getPath()[2];
+        owner.pen_positions.remove(selected);
+        model.fireTreeStructureChanged(new TreePath(new Object[] {model.root, tree.getSelectionPath().getPath()[1], tree.getSelectionPath().getPath()[2]}));
+      }
+    });
     buttonsPanel = new JPanel(new GridBagLayout());
 
 
@@ -144,7 +350,7 @@ public class SpirographEditor extends JPanel
     model = new SpirographTreeModel();
     tree = new JTree(model);
 
-    //tree.setModel(model);
+    //tree.setExpandsSelectedPaths(true);
     tree.setRootVisible(false);
     //tree.setExpandsSelectedPaths(true);
     //tree.setSelectionPath(new TreePath(model.root));
@@ -198,8 +404,12 @@ public class SpirographEditor extends JPanel
       JLabel l = (JLabel) super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
       l.setOpaque(false);
       JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
-      p.setOpaque(false);
+      //setOpaque(false);
+      //setBackground(new Color(0, 0, 0, 0));
+      p.setOpaque(true);
       p.setBackground(new Color(0, 0, 0, 0));
+      l.setOpaque(true);
+      l.setBackground(new Color(0, 0, 0, 0));
 
       TreePath path = tree.getPathForRow(row);
       if (path == null) // I don't know why this happens when you change the look and feel
@@ -231,8 +441,9 @@ public class SpirographEditor extends JPanel
       {
         System.out.println("rendering penposition " + value);
         Spirograph.PenPosition pp = (Spirograph.PenPosition) obj;
-        setBackground(pp.pen_color);
+        p.setBackground(pp.pen_color);
         l.setText("Pen Position | offset= " + pp.offset);
+        //l.setBackground(pp.pen_color);
       }
 
       if (hasFocus)

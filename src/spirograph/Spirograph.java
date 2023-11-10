@@ -30,15 +30,29 @@ public class Spirograph
 
   ArrayList<InnerCircle> inner_circles;
 
+  public InnerCircle addInnerCircle(ArrayList<PenPosition> pen_positions, int inner_radius)
+  {
+    InnerCircle circle = new InnerCircle(pen_positions, inner_radius);
+    inner_circles.add(circle);
+    return circle;
+  }
+
   public class InnerCircle
   {
-    double inner_radius;
+    int inner_radius;
     ArrayList<PenPosition> pen_positions;
 
-    public InnerCircle(ArrayList<PenPosition> pen_positions, double inner_radius)
+    public InnerCircle(ArrayList<PenPosition> pen_positions, int inner_radius)
     {
       this.pen_positions = pen_positions;
       this.inner_radius = inner_radius;
+    }
+
+    public PenPosition addPenPosition(int offset, Color color)
+    {
+      PenPosition pp = new PenPosition(pen_positions.size(), offset, color);
+      pen_positions.add(pp);
+      return pp;
     }
   }
   /**
