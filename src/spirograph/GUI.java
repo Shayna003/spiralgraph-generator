@@ -45,11 +45,18 @@ public class GUI extends JFrame {
   }
 
   // TODO: color support, multiple graphs support, time slider support;
+
+  public int steps_for_completion()
+  {
+    //System.out.println("steps_for_completion: " + settingsPanel.steps_for_completion.getValue());
+    return (int) settingsPanel.steps_for_completion.getValue();
+  }
   class SettingsPanel extends JPanel
   {
     JLabel timeLabel;
     JLabel stepsLabel;
     JLabel stepTimeLabel;
+    JButton redraw;
 
     //JButton generateRandom;
 
@@ -60,7 +67,7 @@ public class GUI extends JFrame {
     public SettingsPanel()
     {
       setLayout(new GridBagLayout());
-      steps_for_completion = new NumberSpinner(1, 1000, 10, 200, null, 4);
+      steps_for_completion = new NumberSpinner(100, 100000, 10000, 5000, null, 4);
       step_time = new NumberSpinner(1, 10, 1, 1, null, 4);
       step = new JSlider(0, 1000000, 0);
       animate = new JButton("animate");
@@ -72,7 +79,18 @@ public class GUI extends JFrame {
       step.addChangeListener(event ->
       {
         timeLabel.setText(String.format("Current Step: %7d", step.getValue()));
+        plotter.repaint();
       });
+
+      steps_for_completion.addChangeListener(event ->
+      {
+        for (Spirograph spiral : spirographs)
+        {
+          spiral.recomputePoints();
+        }
+      });
+
+      redraw = new JButton("redraw");
 
       timeLabel = new JLabel(String.format("Current Step: %7d", 0));
       stepsLabel = new JLabel("Steps for completing one drawing: ");
@@ -84,6 +102,7 @@ public class GUI extends JFrame {
       add(steps_for_completion, new GBC(1, 1).setAnchor(GBC.WEST));
       add(stepTimeLabel, new GBC(0, 2).setAnchor(GBC.EAST));
       add(step_time, new GBC(1, 2).setAnchor(GBC.WEST));
+      add(redraw, new GBC(1, 3).setAnchor(GBC.WEST));
     }
   }
 
@@ -119,17 +138,22 @@ public class GUI extends JFrame {
     }
 
     @Override
-    public void paintComponent(Graphics g) {
+    public void paintComponent(Graphics g)
+    {
       Graphics2D g2 = (Graphics2D) g;
-      for (Spirograph graph : spirographs) {
+      for (Spirograph graph : spirographs)
+      {
         g2.translate(graph.offset_x, graph.offset_y);
-        for (InnerCircle circle : graph.inner_circles) {
-          for (PenPosition pp : circle.pen_positions) {
-            int upper_bound = pp.points_needed_to_draw(step.getValue());
-            if (upper_bound < 0)
-              continue;
+        for (InnerCircle circle : graph.inner_circles)
+        {
+          for (PenPosition pp : circle.pen_positions)
+          {
+            //int upper_bound = pp.points_needed_to_draw(step.getValue());
+            //if (upper_bound < 0)
+            //  continue;
             g2.setColor(pp.pen_color);
-            for (int i = 0; i <= upper_bound; i++) {
+            for (int i = 0; i < pp.points.size(); i++)
+            {
               Point2D.Double p1 = i == 0 ? pp.points.get(0) : pp.points.get(i - 1);
               Point2D.Double p2 = pp.points.get(i);
               g2.drawLine((int) p1.x, (int) p1.y, (int) p2.x, (int) p2.y);
