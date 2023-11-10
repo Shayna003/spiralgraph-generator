@@ -119,6 +119,8 @@ public class Spirograph
   public Spirograph(GUI gui, int outer_radius, int offset_x, int offset_y, ArrayList<InnerCircle> inner_circles)
   {
     this.outer_radius = outer_radius;
+    this.offset_x = offset_x;
+    this.offset_y = offset_y;
     //this.time_for_rotation = time_for_rotation;
     //this.steps_for_rotation = steps_for_rotation;
     this.inner_circles = inner_circles;
